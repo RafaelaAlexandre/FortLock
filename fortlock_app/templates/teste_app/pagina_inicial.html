@@ -4,8 +4,8 @@
     <title>Página Inicial</title>
 </head>
 <body>
-    <h1>Informe seu nome:</h1>
-    <form method="post">
+    <h1>Cadastrar usuário:</h1>
+    <form method="post" style="margin-bottom: 1rem;"> 
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">Enviar</button>
