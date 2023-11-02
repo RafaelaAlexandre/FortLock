@@ -3,11 +3,11 @@ from django import forms
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 
-class UsuarioForm(forms.Form):
-    matricula = forms.CharField(label='Sua matrícula', max_length=30, required=True)
-    nome = forms.CharField(label='Seu nome', max_length=50, required=True)
-    email = forms.EmailField(label='Seu e-mail', required=True)
-    senha = forms.CharField(label='Seu senha', max_length=30, required=True)
+class AddUsuarioForm(forms.Form):
+    matricula = forms.CharField(label='Sua matrícula', max_length=30, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    nome = forms.CharField(label='Seu nome', max_length=50, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    email = forms.EmailField(label='Seu e-mail', required=True, widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    senha = forms.CharField(label='Seu senha', max_length=30, required=True, widget=forms.PasswordInput(attrs={'class': 'form-control'}))
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
@@ -30,7 +30,10 @@ class UsuarioForm(forms.Form):
             if not any(char.islower() for char in senha):
                 raise ValidationError("A senha deve conter pelo menos 1 letra minúscula.")
 
-            if not re.search(r'[!@#\$%\^&\*\(\)_\+\-=\[\]{};:\'",<>\./?\\|]$', senha):
+            if not re.search(r'[!@#\$%\^&\*\(\)_\+\-=\[\]{};:\'",<>\./?\\|]', senha):
                 raise ValidationError("A senha deve conter pelo menos 1 caractere especial (!@#$%^&*()_+-=[]{};:'\",<>/?.|\\).")
 
         return senha
+
+class RemoveUsuarioForm(forms.Form):
+    matricula = forms.CharField(label='Matricula:', max_length=30, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))

@@ -8,3 +8,8 @@
 ### Framework Front usado: ![Bootstrap](https://img.shields.io/badge/-Bootstrap-563D7C?style=flat-square&logo=Bootstrap)
 ### Framework Back usado: ![Django](https://img.shields.io/badge/django-%23092E20.svg?style=for-the-badge&logo=django&logoColor=white)
 ### Projeto hospedado no: ![GitHub](https://img.shields.io/badge/-GitHub-181717?style=flat-square&logo=github)
+
+#### Ao clonar o projeto, rode esse comando para importar as bibliotecas:
+```
+$ pip install -r requesitos.txt
+```

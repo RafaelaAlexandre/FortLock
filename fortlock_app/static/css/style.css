@@ -1,0 +1,44 @@
+.principal {
+    background-color: #1c1c1c;
+    margin-bottom: 4.5rem;
+}
+
+main {
+    color: #FFF;
+}
+
+main form {
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+    gap: 12px;
+}
+
+main form label {
+    font-size: 1.25rem;
+    margin-bottom: -0.5rem;
+}
+
+main form .alert ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    text-align: center;
+}
+
+footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    position: fixed;
+    bottom: -1px;
+    background-color: #212529;
+    color: #FFF;
+    padding: 1.5rem;
+}
+
+footer p {
+    margin: 0;
+    font-weight: 600;
+}

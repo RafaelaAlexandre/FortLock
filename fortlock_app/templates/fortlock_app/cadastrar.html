@@ -1,0 +1,33 @@
+{% with page_title="Fortlock - Cadastro" %}
+    {% include "header.html" %}
+{% endwith %}
+    <main class="container-fluid pt-4">
+        <h1>Cadastrar usuário:</h1>
+        <form method="post" style="margin-bottom: 1rem; width: 50%"> 
+            {% csrf_token %}
+            {% for field, error in form.errors.items %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+            {% for message in messages %}
+                <div class="alert alert-danger" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+            {{ form.matricula.label_tag }}
+            {{ form.matricula }}
+            {{ form.nome.label_tag }}
+            {{ form.nome }}
+            {{ form.email.label_tag }}
+            {{ form.email }}
+            {{ form.senha.label_tag }}
+            {{ form.senha }}
+            <button type="submit" class="btn btn-primary">Cadastrar</button>
+        </form>
+    </main>
+    {% include "footer.html" %}
+</body>
+</html>
+
+
