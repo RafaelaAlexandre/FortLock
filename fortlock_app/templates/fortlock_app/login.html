@@ -1,0 +1,41 @@
+{% with page_title="Fortlock - Login" %}
+    {% include "header.html" %}
+{% endwith %}
+    <main>
+        <section class="hero">
+            <article class="container">
+                <h1>Login de usuário</h1>
+                <div>
+                    <p>Entre com seu usuário e senha para acessar o sistema. <br> Caso não possua um usuário, clique no botão abaixo:</p>
+                    <a class="btn btn-secondary" role="button" href="{% url 'cadastrar' %}">Cadastrar</a>
+                </div>
+            </article>
+        </section>
+        <section>
+            <article class="container my-4">
+                <form method="post" style="margin-bottom: 1rem; width: 50%"> 
+                    {% csrf_token %}
+                    {% for field, error in form.errors.items %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                    {% for message in messages %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                    {{ form.email.label_tag }}
+                    {{ form.email }}
+                    {{ form.senha.label_tag }}
+                    {{ form.senha }}
+                    <button type="submit" class="btn btn-primary">Entrar</button>
+                </form>
+            </article>
+        </section>
+    </main>
+    {% include "footer.html" %}
+</body>
+</html>
+
+

@@ -1,0 +1,26 @@
+{% with page_title="Fortlock - Dashboard" %}
+    {% include "fortlock_app/dashboard/header.html" %}
+{% endwith %}
+    <main class="container-fluid pt-4">
+        <h1 class="mb-4">Dashboard do {{ usuario.nome }}</h1>
+        
+        {% for message in messages %}
+            <div class="alert alert-danger d-none" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {% for cofre in cofres %}
+            <h3>ID: {{ cofre.id }}</h3>
+            <ul>
+                <li><strong>Nome: </strong>{{ cofre.nome }}</li>
+                <li><strong>Senha: </strong>{{ cofre.senha }}</li>
+                <li><strong>Dono: </strong>{{ cofre.usuario }}</li>
+            </ul>
+        {% endfor %}
+    </main>
+    {% include "footer.html" %}
+</body>
+</html>
+
+

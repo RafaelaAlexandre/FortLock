@@ -9,5 +9,5 @@ class UsuarioAdmin(admin.ModelAdmin):
 
 @admin.register(Cofre)
 class CofreAdmin(admin.ModelAdmin):
-    list_display = ('senha', 'usuario')  # Adicione os campos desejados
+    list_display = ('nome', 'senha', 'usuario')  # Adicione os campos desejados
     list_filter = ('usuario',)  # Adicione os campos desejados como filtros

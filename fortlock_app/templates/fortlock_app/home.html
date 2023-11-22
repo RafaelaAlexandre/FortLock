@@ -1,8 +1,80 @@
 {% with page_title="Fortlock - Home" %}
     {% include "header.html" %}
 {% endwith %}
-    <main class="container-fluid pt-4">
-        <h1>Homepage</h1>
+    <main>
+        <section class="hero">
+            <article class="container">
+                <h1>Segurança em Cada Clique: Gerencie Suas Senhas com Confiança.</h1>
+                <div class="d-flex gap-4">
+                    <a class="btn btn-secondary" role="button" href="{% url 'cadastrar' %}">Comece agora</a>
+                    <a class="btn btn-outline-secondary" role="button" href="{% url 'login' %}">Entrar</a>
+                </div>
+            </article>
+        </section>
+        <section class="container mt-5">
+            <article class="row">
+                <div class="col-md-4 d-flex flex-column text-center">
+                    <i class="bi bi-database-lock"></i>
+                    <h2>Gerencie suas senhas com confiança</h2>
+                    <p>Fortlock é um gerenciador de senhas que permite que você armazene todas as suas senhas em um único lugar, com segurança e praticidade.</p>
+                </div>
+                <div class="col-md-4 d-flex flex-column text-center">
+                    <i class="bi bi-cursor-fill"></i>
+                    <h2>Segurança em cada clique</h2>
+                    <p>Fortlock utiliza criptografia de ponta a ponta para garantir que suas senhas estejam seguras e protegidas.</p>
+                </div>
+                <div class="col-md-4 d-flex flex-column text-center">
+                    <i class="bi bi-door-open-fill"></i>
+                    <h2>Gerencie suas senhas de qualquer lugar</h2>
+                    <p>Fortlock é um gerenciador de senhas que permite que você armazene todas as suas senhas em um único lugar, com segurança e praticidade.</p>
+                </div>
+            </article>
+        </section>
+        <section class="container mt-5">
+            <h2 class="mb-3">Principais dúvidas</h2>
+            <div class="accordion accordion-flush" id="accordionFlushExample">
+                <div class="accordion-item">
+                  <h3 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                        Como o gerenciador de senhas mantém minhas informações seguras?
+                    </button>
+                  </h3>
+                  <div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                    <div class="accordion-body"> Nosso gerenciador de senhas utiliza tecnologias avançadas de criptografia para garantir que suas informações estejam protegidas. Utilizamos práticas de segurança rigorosas para manter suas senhas seguras e inacessíveis a terceiros.</div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <h3 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseTwo" aria-expanded="false" aria-controls="flush-collapseTwo">
+                        O que acontece se eu esquecer minha senha mestra?
+                    </button>
+                  </h3>
+                  <div id="flush-collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                    <div class="accordion-body">Se você esquecer sua senha mestra, não podemos recuperá-la, pois ela é armazenada de maneira criptografada e não acessível por nós. Recomendamos configurar uma pergunta de segurança ou utilizar métodos de recuperação alternativos durante o cadastro para garantir que você possa recuperar o acesso à sua conta.</div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <h3 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseThree" aria-expanded="false" aria-controls="flush-collapseThree">
+                        Posso acessar minhas senhas de qualquer dispositivo?
+                    </button>
+                  </h3>
+                  <div id="flush-collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                    <div class="accordion-body">Sim, nosso gerenciador de senhas é baseado em website, permitindo o acesso seguro às suas senhas de qualquer dispositivo com conexão à internet. Basta fazer login na sua conta para acessar suas informações.</div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                    <h3 class="accordion-header">
+                      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseFour" aria-expanded="false" aria-controls="flush-collapseFour">
+                        Como são geradas as senhas seguras?
+                      </button>
+                    </h3>
+                    <div id="flush-collapseFour" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                      <div class="accordion-body">Oferecemos a opção de gerar senhas seguras e únicas para suas contas. Essas senhas são criadas usando algoritmos seguros, garantindo complexidade e resistência a ataques.</div>
+                    </div>
+                  </div>
+              </div>
+        </section>
     </main>
     {% include "footer.html" %}
 </body>

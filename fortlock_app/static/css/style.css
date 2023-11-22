@@ -4,7 +4,49 @@
 }
 
 main {
+    margin-bottom: 7rem;
     color: #FFF;
+}
+
+main .hero {
+    display: flex;
+    justify-content: center;
+    min-height: 45dvh;
+    background-image: url('../img/background.jpg');
+}
+
+main .hero article {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+main .hero article * {
+    max-width: 65dvw;
+}
+
+main section i {
+    font-size: 2.5rem;
+    margin-bottom: .5rem;
+}
+
+main section .accordion-item {
+    background-color: #30373E;
+    border: 1px solid #30373E;
+}
+
+main section .accordion-button {
+    background-color: #262A2F;
+    color: #FFF;
+    font-weight: 700;
+}
+
+main section .accordion-button:not(.collapsed) {
+    background-color: #1B1C1C;
+    color: #FFF;
+    text-decoration: underline;
 }
 
 main form {
@@ -36,6 +78,7 @@ footer {
     background-color: #212529;
     color: #FFF;
     padding: 1.5rem;
+    z-index: 999;
 }
 
 footer p {

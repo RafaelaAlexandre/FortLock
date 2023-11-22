@@ -4,11 +4,59 @@ from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.db import transaction 
 from hashlib import sha256
-from .forms import AddUsuarioForm, RemoveUsuarioForm
-from .models import Usuario
+from .forms import LoginForm, AddUsuarioForm, RemoveUsuarioForm
+from .models import Usuario, Cofre
 
 def home(request):
     return render(request, 'fortlock_app/home.html')
+
+def userLogin(request):
+    # Verificar se o usuário está autenticado
+    user_id = request.session.get('user_id')
+    if user_id is not None:
+        # O usuário está autenticado, redirecione para a página inicial
+        return redirect('homeDashboard')
+    
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            senha = form.cleaned_data['senha']
+
+            cifra = sha256()
+            cifra.update(senha.encode('utf-8'))
+            senhaCifrada = cifra.hexdigest()
+
+            try:
+                usuario = Usuario.objects.get(email=email, senhaMestra=senhaCifrada)
+                # Exemplo: Armazenar o ID do usuário na sessão
+                request.session['user_id'] = usuario.id
+
+                return redirect('homeDashboard')
+            except Usuario.DoesNotExist:
+                messages.error(request, 'Credenciais inválidas. Tente novamente.')
+    else:
+        form = LoginForm()
+    return render(request, 'fortlock_app/login.html', {'form': form})
+
+def userLogout(request):
+    if 'user_id' in request.session:
+        del request.session['user_id']
+    return redirect('home')
+
+def homeDashboard(request):
+    # Verificar se o usuário está autenticado
+    user_id = request.session.get('user_id')
+    if user_id is not None:
+        # O usuário está autenticado, continue com a lógica da view
+        usuario = Usuario.objects.get(pk=user_id)
+        cofres = Cofre.objects.filter(usuario=usuario)
+        return render(request, 'fortlock_app/dashboard/home.html', {'cofres': cofres, 'usuario': usuario})
+        
+    else:
+        # O usuário não está autenticado, redirecione para a página de login
+        return redirect('login')
+        
 
 def cadastrar(request):
     if request.method == 'POST':
@@ -30,7 +78,7 @@ def cadastrar(request):
                     messages.error(request, 'Email já em uso!')
                 else:
                     with transaction.atomic():
-                        Usuario.objects.create(matricula=matricula, nome=nome, email=email, senha=senhaCifrada)
+                        Usuario.objects.create(matricula=matricula, nome=nome, email=email, senhaMestra=senhaCifrada)
                         messages.success(request, 'Usuário criado com sucesso.')
                         return redirect('listar')   
             
