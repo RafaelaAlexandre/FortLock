@@ -1,23 +1,63 @@
 {% with page_title="Fortlock - Dashboard" %}
     {% include "fortlock_app/dashboard/header.html" %}
 {% endwith %}
-    <main class="container-fluid pt-4">
-        <h1 class="mb-4">Dashboard do {{ usuario.nome }}</h1>
-        
-        {% for message in messages %}
-            <div class="alert alert-danger d-none" role="alert">
-                {{ message }}
-            </div>
-        {% endfor %}
+    <main>
+        <section class="hero" style="min-height: 25dvh">
+            <article class="container">
+                <h1>Olá {{ usuario.nome }}</h1>
+            </article>
+        </section>
+        <section>
+            {% for message in messages %}
+                <div class="alert alert-danger d-none" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
 
-        {% for cofre in cofres %}
-            <h3>ID: {{ cofre.id }}</h3>
-            <ul>
-                <li><strong>Nome: </strong>{{ cofre.nome }}</li>
-                <li><strong>Senha: </strong>{{ cofre.senha }}</li>
-                <li><strong>Dono: </strong>{{ cofre.usuario }}</li>
-            </ul>
-        {% endfor %}
+            {% if cofres %}
+                <article class="container my-4">
+                    <h2 class="mb-3">Seus Cofres</h2>
+
+                    <div class="row dashboard gap-4">
+                        {% for cofre in cofres %}
+                            <div class="card col-md-3">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ cofre.nome }}</h5>
+                                    <hr>
+                                    <p class="card-text">Senha: {{ cofre.senha }}</p>
+                                    <div class="d-flex flex-column gap-2">
+                                        <a href="{% url 'home' %}" class="btn btn-secondary">Gerar senha</a>
+                                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#removerSenhaCofre{{cofre.id}}">Remover senha</button>
+                                    
+                                        <!-- Modal -->
+                                        <div class="modal fade" id="removerSenhaCofre{{cofre.id}}" tabindex="-1" aria-labelledby="removerSenhaCofre{{cofre.id}}Label" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                <h1 class="modal-title fs-5" id="removerSenhaCofre{{cofre.id}}Label" style="color: #000;">Remover cofre de {{ cofre.nome }}</h1>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form method="post" action="{% url 'removerCofre' %}">
+                                                        {% csrf_token %}
+                                                        <p style="color: #000">Tem certeza? Ao apagar, não será reversível...</p>
+                                                        <input type="hidden" name="cofre" id="cofre" value="{{ cofre.id }}">
+                                                        <button type="submit" class="btn btn-danger mx-auto">Sim, remover cofre!</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </article>
+            {% else %}
+                <span>Você não possui nenhum cofre cadastrado</span>
+            {% endif %}
+        </section>      
     </main>
     {% include "footer.html" %}
 </body>

@@ -12,8 +12,7 @@ def home(request):
 
 def userLogin(request):
     # Verificar se o usuário está autenticado
-    user_id = request.session.get('user_id')
-    if user_id is not None:
+    if 'user_id' in request.session:
         # O usuário está autenticado, redirecione para a página inicial
         return redirect('homeDashboard')
     
@@ -56,7 +55,38 @@ def homeDashboard(request):
     else:
         # O usuário não está autenticado, redirecione para a página de login
         return redirect('login')
-        
+
+def removerConta(request):
+    user_id = request.session.get('user_id')
+    if user_id is not None:
+        if request.method == 'POST':
+            usuario = Usuario.objects.get(pk=user_id)
+            senha = request.POST.get('senha', '')
+            cifra = sha256()
+            cifra.update(senha.encode('utf-8'))
+            senhaCifrada = cifra.hexdigest()
+            if senhaCifrada == usuario.senhaMestra:
+                usuario.delete()
+                return redirect('logout') 
+            else:
+                messages.error(request, 'Senha incorreta!')
+                return redirect('homeDashboard')
+        else:
+            return HttpResponseNotAllowed(['POST'])
+    else:
+        return redirect('login')
+
+def removerCofre(request):
+    if 'user_id' in request.session:
+        if request.method == 'POST':
+            cofre = request.POST.get('cofre', '')
+            cofre = Cofre.objects.get(pk=cofre)
+            cofre.delete()
+            return redirect('homeDashboard') 
+        else:
+            return HttpResponseNotAllowed(['POST'])
+    else:
+        return redirect('login')
 
 def cadastrar(request):
     if request.method == 'POST':
@@ -78,9 +108,12 @@ def cadastrar(request):
                     messages.error(request, 'Email já em uso!')
                 else:
                     with transaction.atomic():
-                        Usuario.objects.create(matricula=matricula, nome=nome, email=email, senhaMestra=senhaCifrada)
+                        usuario = Usuario.objects.create(matricula=matricula, nome=nome, email=email, senhaMestra=senhaCifrada)
                         messages.success(request, 'Usuário criado com sucesso.')
-                        return redirect('listar')   
+                        if 'user_id' in request.session:
+                            del request.session['user_id']
+                        request.session['user_id'] = usuario.id
+                        return redirect('homeDashboard')   
             
             except Exception as e:
                 print(e)

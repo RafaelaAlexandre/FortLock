@@ -68,6 +68,10 @@ main form .alert ul {
     text-align: center;
 }
 
+main .dashboard .card {
+    background-color: #262A2F;
+}
+
 footer {
     display: flex;
     justify-content: center;
