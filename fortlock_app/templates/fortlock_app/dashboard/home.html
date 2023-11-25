@@ -2,31 +2,40 @@
     {% include "fortlock_app/dashboard/header.html" %}
 {% endwith %}
     <main>
-        <section class="hero" style="min-height: 25dvh">
+        <section class="hero">
             <article class="container">
                 <h1>Olá {{ usuario.nome }}</h1>
+                <p>Deseja cadastrar um novo cofre?</p>
+                <a href="{% url 'cadastrarCofre' %}" class="btn btn-primary">Cadastrar cofre</a>
             </article>
         </section>
-        <section>
+        <section class="container my-4">
             {% for message in messages %}
-                <div class="alert alert-danger d-none" role="alert">
-                    {{ message }}
-                </div>
+                {% if 'success' in message.tags %}
+                    <div class="alert alert-primary" role="alert">
+                        {{ message }}
+                    </div>
+                {% else %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ message }}
+                    </div>
+                {% endif %}
             {% endfor %}
 
             {% if cofres %}
-                <article class="container my-4">
+                <article>
                     <h2 class="mb-3">Seus Cofres</h2>
 
                     <div class="row dashboard gap-4">
                         {% for cofre in cofres %}
                             <div class="card col-md-3">
                                 <div class="card-body">
-                                    <h5 class="card-title">{{ cofre.nome }}</h5>
+                                    <h5 class="card-title text-center">{{ cofre.nome }}</h5>
                                     <hr>
-                                    <p class="card-text">Senha: {{ cofre.senha }}</p>
                                     <div class="d-flex flex-column gap-2">
-                                        <a href="{% url 'home' %}" class="btn btn-secondary">Gerar senha</a>
+                                        <input type="hidden" class="senhaCofre" id="senhaCofre{{cofre.id}}" value="{{cofre.senha}}">
+                                        <button type="button" class="btn btn-success copiarSenha" id="{{ cofre.id }}">Copiar senha</button>
+                                        <a href="{% url 'gerarSenha' idCofre=cofre.id %}" class="btn btn-secondary">Gerar senha</a>
                                         <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#removerSenhaCofre{{cofre.id}}">Remover senha</button>
                                     
                                         <!-- Modal -->
@@ -55,12 +64,12 @@
                     </div>
                 </article>
             {% else %}
-                <span>Você não possui nenhum cofre cadastrado</span>
+                <strong class="text-center d-block mt-5">Você não possui nenhum cofre cadastrado</strong>
             {% endif %}
         </section>      
     </main>
+    <script src="../static/js/script.js"></script>
     {% include "footer.html" %}
 </body>
 </html>
-
 

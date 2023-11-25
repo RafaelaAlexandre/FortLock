@@ -1,10 +1,13 @@
 # REQUISIÇÃO API import requests
+import string
+import random
+import re
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.db import transaction 
 from hashlib import sha256
-from .forms import LoginForm, AddUsuarioForm, RemoveUsuarioForm
+from .forms import LoginForm, AddUsuarioForm, RemoveUsuarioForm, AddCofreForm
 from .models import Usuario, Cofre
 
 def home(request):
@@ -50,7 +53,40 @@ def homeDashboard(request):
         # O usuário está autenticado, continue com a lógica da view
         usuario = Usuario.objects.get(pk=user_id)
         cofres = Cofre.objects.filter(usuario=usuario)
-        return render(request, 'fortlock_app/dashboard/home.html', {'cofres': cofres, 'usuario': usuario})
+
+        valores_iniciais = {
+            'matricula': usuario.matricula,
+            'nome': usuario.nome,
+            'email': usuario.email,
+        }
+
+        form = AddUsuarioForm(initial=valores_iniciais)
+        return render(request, 'fortlock_app/dashboard/home.html', {'cofres': cofres, 'usuario': usuario, 'form': form})
+        
+    else:
+        # O usuário não está autenticado, redirecione para a página de login
+        return redirect('login')
+
+def gerarSenha(request, idCofre):
+    # Verificar se o usuário está autenticado
+    user_id = request.session.get('user_id')
+    if user_id is not None:
+        cofre = Cofre.objects.get(pk=idCofre)
+        if cofre.usuario.id == user_id:
+            caracteres = string.ascii_letters + string.digits + string.punctuation
+            while True:
+                senhaNova = ''.join(random.choice(caracteres) for _ in range(16))
+
+                # Verifica se a senhaNova atende aos critérios
+                if any(caractere.islower() for caractere in senhaNova) and \
+                    any(caractere.isupper() for caractere in senhaNova) and \
+                    any(caractere.isdigit() for caractere in senhaNova) and \
+                    any(caractere in string.punctuation for caractere in senhaNova):
+                        break
+            
+            cofre.senha = senhaNova
+            cofre.save()
+            return redirect('homeDashboard')
         
     else:
         # O usuário não está autenticado, redirecione para a página de login
@@ -82,6 +118,7 @@ def removerCofre(request):
             cofre = request.POST.get('cofre', '')
             cofre = Cofre.objects.get(pk=cofre)
             cofre.delete()
+            messages.error(request, 'Cofre removido com sucesso!')
             return redirect('homeDashboard') 
         else:
             return HttpResponseNotAllowed(['POST'])
@@ -123,6 +160,94 @@ def cadastrar(request):
         form = AddUsuarioForm()
     return render(request, 'fortlock_app/cadastrar.html', {'form': form})
 
+def cadastrarCofre(request):
+    user_id = request.session.get('user_id')
+    if user_id is not None:
+        if request.method == 'POST':
+            form = AddCofreForm(request.POST)
+            if form.is_valid():
+                nome = form.cleaned_data['nome']
+                senha = form.cleaned_data['senha']
+
+                try:
+                    with transaction.atomic():
+                        cofre = Cofre.objects.create(nome=nome, senha=senha, usuario=Usuario.objects.get(pk=request.session.get('user_id')))
+                        messages.success(request, 'Cofre criado com sucesso.')
+                        return redirect('homeDashboard')   
+                
+                except Exception as e:
+                    print(e)
+                    messages.error(request, f"Ocorreu um erro durante a criação do cofre: {e}")
+
+        else:
+            form = AddCofreForm()
+        return render(request, 'fortlock_app/dashboard/cadastrar.html', {'form': form})
+    else:
+        return redirect('login')
+
+def editarConta(request):
+    user_id = request.session.get('user_id')
+    if user_id is not None:
+        if request.method == 'POST':
+            form = AddUsuarioForm(request.POST)
+            
+            usuario = Usuario.objects.get(pk=user_id)
+            matricula = form.data['matricula']
+            nome = form.data['nome']
+            email = form.data['email']
+            senha = form.data['senha']
+            print("TESTEEEEEEE " + matricula, nome, email, senha)
+            senhaNova = request.POST.get('senhaNova', '')
+
+            if matricula != usuario.matricula:
+                if Usuario.objects.filter(matricula=matricula).exists():
+                    messages.error(request, 'Matricula já em uso!')
+                    return redirect('homeDashboard')
+
+            if email != usuario.email:
+                if Usuario.objects.filter(email=email).exists():
+                    messages.error(request, 'Email já em uso!')
+                    return redirect('homeDashboard')
+
+            if senhaNova:
+                if len(senhaNova) < 8:
+                    messages.error(request, 'A senha deve ter no mínimo 8 caracteres.')
+                    return redirect('homeDashboard')
+
+                if not any(char.isupper() for char in senhaNova):
+                    messages.error(request, 'A senha deve conter pelo menos 1 letra maiúscula.')
+                    return redirect('homeDashboard')
+
+                if not any(char.islower() for char in senhaNova):
+                    messages.error(request, 'A senha deve conter pelo menos 1 letra minúscula.')
+                    return redirect('homeDashboard')
+
+                if not re.search(r'[!@#\$%\^&\*\(\)_\+\-=\[\]{};:\'",<>\./?\\|]', senhaNova):
+                    messages.error(request, 'A senha deve conter pelo menos 1 caractere especial (!@#$%^&*()_+-=[]{};:\'\",<>/?.|\\).')
+                    return redirect('homeDashboard')
+
+            cifra = sha256()
+            cifra.update(senha.encode('utf-8'))
+            senhaCifrada = cifra.hexdigest()
+            if senhaCifrada == usuario.senhaMestra:
+                cifra = sha256()
+                cifra.update(senhaNova.encode('utf-8'))
+                senhaNovaCifrada = cifra.hexdigest()
+
+                usuario.matricula = matricula
+                usuario.nome = nome
+                usuario.email = email
+                usuario.senhaMestra = senhaNovaCifrada
+                usuario.save()
+                messages.success(request, 'Dados atualizados!')
+                return redirect('homeDashboard')  
+            else:
+                messages.error(request, 'Senha mestra incorreta!')
+                return redirect('homeDashboard')
+        else:
+            return HttpResponseNotAllowed(['POST'])
+    else:
+        return redirect('login')
 
 def listar(request):
     usuarios = Usuario.objects.all()

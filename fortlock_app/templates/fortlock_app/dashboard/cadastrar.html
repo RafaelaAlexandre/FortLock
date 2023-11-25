@@ -1,0 +1,38 @@
+{% with page_title="Fortlock - Cadastrar Cofre" %}
+    {% include "fortlock_app/dashboard/header.html" %}
+{% endwith %}
+    <main>
+        <section class="hero" style="min-height: 25dvh">
+            <article class="container">
+                <h1>Cadastre um novo cofre</h1>
+            </article>
+        </section>
+        <section>
+            {% for message in messages %}
+                <div class="alert alert-danger d-none" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+
+            <article class="container my-4">
+                <form method="post" style="margin-bottom: 1rem; width: 50%"> 
+                    {% csrf_token %}
+                    {% for field, error in form.errors.items %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ error }}
+                        </div>
+                    {% endfor %}
+                    {{ form.nome.label_tag }}
+                    {{ form.nome }}
+                    {{ form.senha.label_tag }}
+                    {{ form.senha }}
+                    <button type="submit" class="btn btn-primary">Cadastrar</button>
+                </form>
+            </article>
+        </section>      
+    </main>
+    <script src="../static/js/script.js"></script>
+    {% include "footer.html" %}
+</body>
+</html>
+
