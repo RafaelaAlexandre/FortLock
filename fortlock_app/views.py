@@ -196,7 +196,7 @@ def editarConta(request):
             nome = form.data['nome']
             email = form.data['email']
             senha = form.data['senha']
-            print("TESTEEEEEEE " + matricula, nome, email, senha)
+
             senhaNova = request.POST.get('senhaNova', '')
 
             if matricula != usuario.matricula:
@@ -249,26 +249,26 @@ def editarConta(request):
     else:
         return redirect('login')
 
-def listar(request):
-    usuarios = Usuario.objects.all()
-    return render(request, 'fortlock_app/listar.html', {'usuarios': usuarios})
+def editarCofre(request):
+    user_id = request.session.get('user_id')
+    if user_id is not None:
+        if request.method == 'POST':
+            form = AddCofreForm(request.POST)
+            idCofre = request.POST.get('idCofre', '') 
+            nome = request.POST.get('nomeCofre', '')
+            senha = request.POST.get('senhaCofre', '')
 
-def remover(request):
-    if request.method == 'POST':
-        form = RemoveUsuarioForm(request.POST)
-        if form.is_valid():
-            matricula = form.cleaned_data['matricula']
-
-            try:
-                with transaction.atomic():
-                    usuario = Usuario.objects.get(matricula=matricula)
-                    usuario.delete()
-                    messages.error(request, 'Usuário removido com sucesso.')
-                    return redirect('listar')
-
-            except Usuario.DoesNotExist:
-                form.add_error('matricula', "Usuário não encontrado.")
-
+            cofre = Cofre.objects.get(pk=idCofre)
+            if cofre.usuario.id == user_id:
+                cofre.nome = nome
+                cofre.senha = senha
+                cofre.save()
+                messages.success(request, 'Dados atualizados!')
+                return redirect('homeDashboard')  
+            else:
+                messages.error(request, 'Você não tem permissão para editar este cofre!')
+                return redirect('homeDashboard')
+        else:
+            return HttpResponseNotAllowed(['POST'])
     else:
-        form = RemoveUsuarioForm()
-    return render(request, 'fortlock_app/remover.html', {'form': form})
+        return redirect('login')

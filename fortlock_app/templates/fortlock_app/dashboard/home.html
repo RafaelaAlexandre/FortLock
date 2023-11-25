@@ -36,14 +36,39 @@
                                         <input type="hidden" class="senhaCofre" id="senhaCofre{{cofre.id}}" value="{{cofre.senha}}">
                                         <button type="button" class="btn btn-success copiarSenha" id="{{ cofre.id }}">Copiar senha</button>
                                         <a href="{% url 'gerarSenha' idCofre=cofre.id %}" class="btn btn-secondary">Gerar senha</a>
-                                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#removerSenhaCofre{{cofre.id}}">Remover senha</button>
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editarCofre{{cofre.id}}">Editar cofre</button>
+                                    
+                                        <!-- Modal -->
+                                        <div class="modal fade" id="editarCofre{{cofre.id}}" tabindex="-1" aria-labelledby="editarCofre{{cofre.id}}Label" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                <h1 class="modal-title fs-5" id="editarCofre{{cofre.id}}Label" style="color: #000;">Editar cofre: {{ cofre.nome }}</h1>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form method="post" action="{% url 'editarCofre' %}">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="idCofre" id="cofre" value="{{ cofre.id }}">
+                                                        <label for="nome" class="text-dark">Nome do cofre</label>
+                                                        <input type="text" class="form-control" id="nome" name="nomeCofre" value="{{ cofre.nome }}" required>
+                                                        <label for="senha" class="text-dark">Senha do cofre</label>
+                                                        <input type="text" class="form-control" id="senha" name="senhaCofre" value="{{ cofre.senha }}" required>
+                                                        <button type="submit" class="btn btn-primary mx-auto">Atualizar cofre!</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            </div>
+                                        </div>
+
+                                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#removerSenhaCofre{{cofre.id}}">Remover Cofre</button>
                                     
                                         <!-- Modal -->
                                         <div class="modal fade" id="removerSenhaCofre{{cofre.id}}" tabindex="-1" aria-labelledby="removerSenhaCofre{{cofre.id}}Label" aria-hidden="true">
                                             <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <div class="modal-header">
-                                                <h1 class="modal-title fs-5" id="removerSenhaCofre{{cofre.id}}Label" style="color: #000;">Remover cofre de {{ cofre.nome }}</h1>
+                                                <h1 class="modal-title fs-5" id="removerSenhaCofre{{cofre.id}}Label" style="color: #000;">Remover cofre: {{ cofre.nome }}</h1>
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body">
