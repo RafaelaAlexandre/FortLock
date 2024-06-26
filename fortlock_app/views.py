@@ -2,13 +2,22 @@
 import string
 import random
 import re
+import threading
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseNotAllowed
 from django.db import transaction 
 from hashlib import sha256
 from .forms import LoginForm, AddUsuarioForm, RemoveUsuarioForm, AddCofreForm
 from .models import Usuario, Cofre
+from .send_email import send_email
+from datetime import datetime
+
+# Configurações do email
+smtp_server = 'smtp.gmail.com'
+smtp_port = 587
+smtp_username = 'fortlock.faeterj@gmail.com'
+smtp_password = 'rbueosbvkzwvcfsq'
 
 def home(request):
     return render(request, 'fortlock_app/home.html')
@@ -33,6 +42,27 @@ def userLogin(request):
                 usuario = Usuario.objects.get(email=email, senhaMestra=senhaCifrada)
                 # Exemplo: Armazenar o ID do usuário na sessão
                 request.session['user_id'] = usuario.id
+
+                # Obter o datetime atual
+                data_hora_atual = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+
+                # Obter o IP do usuário
+                ip_usuario = request.META.get('REMOTE_ADDR', '')
+
+                # Obter o agente de usuário (navegador)
+                user_agent = request.META.get('HTTP_USER_AGENT', '')
+
+                # Criar o corpo da mensagem com informações adicionais
+                body = (
+                    f'Olá {usuario.nome},\n\n'
+                    f'Houve um login às: {data_hora_atual}\n\n'
+                    f'Informações adicionais:\n'
+                    f'IP: {ip_usuario}\n'
+                    f'Navegador: {user_agent}'
+                )
+
+                subject = 'Houve um login na sua conta!'
+                threading.Thread(target=send_email, args=(subject, body, usuario.email)).start()
 
                 return redirect('homeDashboard')
             except Usuario.DoesNotExist:
@@ -86,6 +116,21 @@ def gerarSenha(request, idCofre):
             
             cofre.senha = senhaNova
             cofre.save()
+
+            # Obter o datetime atual
+            data_hora_atual = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+
+            # Criar o corpo da mensagem com informações adicionais
+            body = (
+                f'Olá {cofre.usuario.nome},\n\n'
+                f'A nova senha do seu cofre {cofre.nome} é: {senhaNova}\n'
+                f'a senha foi gerada às: {data_hora_atual}\n\n'
+            )
+            
+            # Enviar email de forma assíncrona
+            subject = 'Nova senha do cofre gerada' 
+            threading.Thread(target=send_email, args=(subject, body, cofre.usuario.email)).start()
+
             return redirect('homeDashboard')
         
     else:
@@ -103,6 +148,14 @@ def removerConta(request):
             senhaCifrada = cifra.hexdigest()
             if senhaCifrada == usuario.senhaMestra:
                 usuario.delete()
+
+                # Criar o corpo da mensagem com informações adicionais
+                body = (
+                    f'Sentiremos sua falta :('
+                )
+
+                subject = 'Sua conta foi removida!'
+                threading.Thread(target=send_email, args=(subject, body, usuario.email)).start()
                 return redirect('logout') 
             else:
                 messages.error(request, 'Senha incorreta!')
@@ -117,8 +170,34 @@ def removerCofre(request):
         if request.method == 'POST':
             cofre = request.POST.get('cofre', '')
             cofre = Cofre.objects.get(pk=cofre)
+            
+            cofreNome = cofre.nome
+            usuario = Usuario.objects.get(pk=request.session.get('user_id'))
+
             cofre.delete()
             messages.error(request, 'Cofre removido com sucesso!')
+
+            # Obter o datetime atual
+            data_hora_atual = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+
+            # Obter o IP do usuário
+            ip_usuario = request.META.get('REMOTE_ADDR', '')
+
+            # Obter o agente de usuário (navegador)
+            user_agent = request.META.get('HTTP_USER_AGENT', '')
+
+            # Criar o corpo da mensagem com informações adicionais
+            body = (
+                f'Olá {usuario.nome},\n\n'
+                f'Seu cofre {cofreNome} foi removido às: {data_hora_atual}\n\n'
+                f'Informações adicionais:\n'
+                f'IP: {ip_usuario}\n'
+                f'Navegador: {user_agent}'
+            )
+
+            subject = 'Seu cofre foi removido!'
+            threading.Thread(target=send_email, args=(subject, body, usuario.email)).start()
+
             return redirect('homeDashboard') 
         else:
             return HttpResponseNotAllowed(['POST'])
@@ -150,6 +229,12 @@ def cadastrar(request):
                         if 'user_id' in request.session:
                             del request.session['user_id']
                         request.session['user_id'] = usuario.id
+
+                        # Enviar email de forma assíncrona
+                        subject = 'Bem-vindo ao Fortlock'
+                        body = f'Olá {nome},\n\nSua conta foi criada com sucesso! Boas vindas ao Fortlock!'
+                        threading.Thread(target=send_email, args=(subject, body, email)).start()
+
                         return redirect('homeDashboard')   
             
             except Exception as e:
@@ -173,6 +258,15 @@ def cadastrarCofre(request):
                     with transaction.atomic():
                         cofre = Cofre.objects.create(nome=nome, senha=senha, usuario=Usuario.objects.get(pk=request.session.get('user_id')))
                         messages.success(request, 'Cofre criado com sucesso.')
+                        
+                        # Enviar email de confirmação de criação de cofre
+                        usuario = Usuario.objects.get(pk=request.session.get('user_id'))
+
+                        # Enviar email de forma assíncrona
+                        subject = 'Cofre criado'
+                        body = f'Olá {usuario.nome},\n\nSeu cofre {nome} foi criado com sucesso!'
+                        threading.Thread(target=send_email, args=(subject, body, usuario.email)).start()
+                        
                         return redirect('homeDashboard')   
                 
                 except Exception as e:
@@ -240,6 +334,12 @@ def editarConta(request):
                 usuario.senhaMestra = senhaNovaCifrada
                 usuario.save()
                 messages.success(request, 'Dados atualizados!')
+                
+                # Enviar email de forma assíncrona
+                subject = 'Dados atualizados'
+                body = f'Olá {usuario.nome},\n\nSeus dados foram atualizados com sucesso!'
+                threading.Thread(target=send_email, args=(subject, body, usuario.email)).start()
+
                 return redirect('homeDashboard')  
             else:
                 messages.error(request, 'Senha mestra incorreta!')
@@ -264,6 +364,12 @@ def editarCofre(request):
                 cofre.senha = senha
                 cofre.save()
                 messages.success(request, 'Dados atualizados!')
+                
+                # Enviar email de forma assíncrona
+                subject = 'Cofre atualizado'
+                body = f'Olá {cofre.usuario.nome},\n\nSeu cofre {nome} foi atualizado com sucesso!'
+                threading.Thread(target=send_email, args=(subject, body, cofre.usuario.email)).start()
+
                 return redirect('homeDashboard')  
             else:
                 messages.error(request, 'Você não tem permissão para editar este cofre!')
